@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Simple Chess with AI</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Chessboard.js CSS from CDN -->
+  <link rel="stylesheet" href="https://unpkg.com/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
+</head>
+<body>
+  <header>
+    <h1>Simple Chess</h1>
+    <p>Play vs another human or an AI with adjustable strength (ELO-like)</p>
+  </header>
+
+  <main>
+    <section id="board-area">
+      <div id="board" class="board"></div>
+      <div id="controls">
+        <button id="undoBtn">Undo</button>
+        <button id="resetBtn">Reset</button>
+
+        <label for="orientation">Orientation:</label>
+        <select id="orientation">
+          <option value="white">White</option>
+          <option value="black">Black</option>
+        </select>
+
+        <label><input type="checkbox" id="playAI" /> Play vs AI</label>
+
+        <label for="aiSide">AI plays:</label>
+        <select id="aiSide">
+          <option value="black">Black</option>
+          <option value="white">White</option>
+        </select>
+
+        <label for="aiStrength">AI strength (approx ELO): <span id="eloLabel">1200</span></label>
+        <input id="aiStrength" type="range" min="600" max="2600" step="100" value="1200" />
+      </div>
+    </section>
+
+    <aside id="right-panel">
+      <div id="status" class="panel">
+        <h2>Game Status</h2>
+        <div id="statusText">Ready</div>
+      </div>
+
+      <div id="moves" class="panel">
+        <h2>Move List</h2>
+        <ol id="moveList"></ol>
+      </div>
+
+      <div id="settings" class="panel">
+        <h2>Settings</h2>
+        <label><input type="checkbox" id="showLegal" checked /> Highlight legal moves</label>
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    <small>Made with chess.js and chessboard.js — drag & drop to move pieces. AI uses a minimax evaluator (no external engine).</small>
+  </footer>
+
+  <!-- Dependencies -->
+  <script src="https://unpkg.com/chess.js@1.0.0/chess.js"></script>
+  <script src="https://unpkg.com/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+
+  <!-- App script -->
+  <script src="script.js"></script>
+</body>
+</html>
