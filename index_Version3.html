@@ -1,51 +1,81 @@
-<!-- ✅ Play Button Script -->
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Simple Chess with AI</title>
+  <link rel="stylesheet" href="https://unpkg.com/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css" />
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    #board { width: 400px; margin: 20px auto; }
+    #controls { text-align: center; margin-bottom: 20px; }
+    #moveList { max-height: 200px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <h1>Simple Chess</h1>
+  <p>Play vs another human or AI</p>
+
+  <div id="controls">
+    <button id="playBtn">Play</button>
+    <label><input type="checkbox" id="playAI" /> Play vs AI</label>
+    <label for="aiSide">AI plays:</label>
+    <select id="aiSide">
+      <option value="b">Black</option>
+      <option value="w">White</option>
+    </select>
+  </div>
+
+  <div id="board"></div>
+  <div id="statusText">Ready</div>
+  <ol id="moveList"></ol>
+
+  <script src="https://unpkg.com/chess.js@1.0.0/chess.js"></script>
+  <script src="https://unpkg.com/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+  <script>
+    const boardElement = document.getElementById('board');
     const statusText = document.getElementById('statusText');
     const moveList = document.getElementById('moveList');
     const playBtn = document.getElementById('playBtn');
     const playAI = document.getElementById('playAI');
     const aiSide = document.getElementById('aiSide');
-    const aiStrength = document.getElementById('aiStrength');
-    const orientationSelect = document.getElementById('orientation');
-    const showLegal = document.getElementById('showLegal');
 
     let game = new Chess();
     let board = Chessboard('board', {
       draggable: true,
       position: 'start',
-      orientation: orientationSelect.value,
-      onDrop: handleMove
+      onDrop: onDrop
     });
 
-    function handleMove(source, target) {
+    function onDrop(source, target) {
       const move = game.move({ from: source, to: target, promotion: 'q' });
       if (!move) return 'snapback';
 
-      updateBoard();
+      updateStatus();
       logMove(move.san);
 
-      if (playAI.checked && game.turn() === aiSide.value[0]) {
+      if (playAI.checked && game.turn() === aiSide.value) {
         setTimeout(() => {
-          const aiMove = getBestMove(game, parseInt(aiStrength.value));
-          if (aiMove) {
-            game.move(aiMove);
-            updateBoard();
-            logMove(aiMove.san);
-          }
-        }, 300);
+          const moves = game.moves();
+          const move = moves[Math.floor(Math.random() * moves.length)];
+          game.move(move);
+          board.position(game.fen());
+          logMove(move);
+          updateStatus();
+        }, 500);
       }
     }
 
-    function updateBoard() {
-      board.position(game.fen());
-      statusText.textContent = game.in_checkmate()
-        ? 'Checkmate!'
-        : game.in_draw()
-        ? 'Draw!'
-        : game.in_check()
-        ? 'Check!'
-        : 'Your move';
+    function updateStatus() {
+      if (game.in_checkmate()) {
+        statusText.textContent = 'Checkmate!';
+      } else if (game.in_draw()) {
+        statusText.textContent = 'Draw!';
+      } else if (game.in_check()) {
+        statusText.textContent = 'Check!';
+      } else {
+        statusText.textContent = 'Your move';
+      }
     }
 
     function logMove(san) {
@@ -56,68 +86,10 @@
 
     playBtn.addEventListener('click', () => {
       game.reset();
-      board.orientation(orientationSelect.value);
-      board.position(game.fen());
+      board.position('start');
       moveList.innerHTML = '';
       statusText.textContent = 'Game started!';
     });
-
-    orientationSelect.addEventListener('change', () => {
-      board.orientation(orientationSelect.value);
-    });
-
-    // Basic minimax AI (depth-limited)
-    function getBestMove(game, strength) {
-      const depth = Math.max(1, Math.floor((strength - 600) / 500));
-      return minimaxRoot(depth, game, true);
-    }
-
-    function minimaxRoot(depth, game, isMaximizingPlayer) {
-      const moves = game.moves({ verbose: true });
-      let bestMove = null;
-      let bestValue = -Infinity;
-
-      for (const move of moves) {
-        game.move(move);
-        const value = minimax(depth - 1, game, !isMaximizingPlayer);
-        game.undo();
-        if (value > bestValue) {
-          bestValue = value;
-          bestMove = move;
-        }
-      }
-      return bestMove;
-    }
-
-    function minimax(depth, game, isMaximizingPlayer) {
-      if (depth === 0) return evaluateBoard(game.board());
-
-      const moves = game.moves({ verbose: true });
-      let bestValue = isMaximizingPlayer ? -Infinity : Infinity;
-
-      for (const move of moves) {
-        game.move(move);
-        const value = minimax(depth - 1, game, !isMaximizingPlayer);
-        game.undo();
-        bestValue = isMaximizingPlayer
-          ? Math.max(bestValue, value)
-          : Math.min(bestValue, value);
-      }
-      return bestValue;
-    }
-
-    function evaluateBoard(board) {
-      const values = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
-      let score = 0;
-      for (const row of board) {
-        for (const piece of row) {
-          if (piece) {
-            const value = values[piece.type];
-            score += piece.color === 'w' ? value : -value;
-          }
-        }
-      }
-      return score;
-    }
-  });
-</script>
+  </script>
+</body>
+</html>
